@@ -61,7 +61,7 @@
     margin-bottom: 10px;
   }
 
-  .api-row {
+  .input-row {
     display: flex;
     gap: 8px;
     align-items: center;
@@ -119,7 +119,7 @@
   .btn-primary:hover { background: #234A25; }
   .btn-primary:disabled { background: var(--text-hint); cursor: not-allowed; }
 
-  .api-saved {
+  .saved-indicator {
     display: inline-flex;
     align-items: center;
     gap: 5px;
@@ -129,11 +129,8 @@
   }
   .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-mid); }
 
-  /* results */
   #results { display: none; }
   #results.show { display: block; }
-
-  .result-section { margin-bottom: 1rem; }
 
   .checklist-table { width: 100%; border-collapse: collapse; font-size: 13px; }
   .checklist-table tr { border-bottom: 1px solid var(--border); }
@@ -160,6 +157,7 @@
     border-radius: var(--radius-sm);
     font-size: 14px;
     font-weight: 500;
+    margin-bottom: 1rem;
   }
   .verdict-pass { background: var(--accent-light); color: var(--accent); }
   .verdict-fail { background: var(--red-light); color: var(--red); }
@@ -227,6 +225,8 @@
     margin-bottom: 10px;
   }
 
+  .hint { font-size: 11px; color: var(--text-hint); margin-top: 8px; }
+
   footer {
     text-align: center;
     font-size: 11px;
@@ -246,16 +246,13 @@
 
   <!-- API Key -->
   <div class="card">
-    <div class="card-label">Anthropic API 키</div>
-    <div class="api-row">
+    <div class="card-label">OpenAI API 키</div>
+    <div class="input-row">
       <input type="password" id="apiKeyInput" placeholder="sk-..." />
       <button class="btn btn-save" onclick="saveKey()">저장</button>
-      <span id="keySaved" class="api-saved" style="display:none"><span class="dot"></span>저장됨</span>
+      <span id="keySaved" class="saved-indicator" style="display:none"><span class="dot"></span>저장됨</span>
     </div>
-    <p style="font-size:11px; color:var(--text-hint); margin-top:8px;">
-      키는 이 브라우저에만 저장되며 외부로 전송되지 않습니다. 
-      <a href="https://platform.openai.com/api-keys" target="_blank" style="color:var(--blue);">platform.openai.com/api-keys</a>에서 발급
-    </p>
+    <p class="hint">키는 이 브라우저에만 저장되며 외부로 전송되지 않습니다.</p>
   </div>
 
   <!-- Input -->
@@ -274,17 +271,14 @@
   <!-- Results -->
   <div id="results">
 
-    <!-- Checklist -->
-    <div class="card result-section">
+    <div class="card">
       <div class="card-label">체크리스트 판정</div>
       <table class="checklist-table" id="checklistTable"></table>
     </div>
 
-    <!-- Verdict -->
-    <div id="verdictBox" style="margin-bottom:1rem;"></div>
+    <div id="verdictBox"></div>
 
-    <!-- Email -->
-    <div class="card result-section" id="emailSection" style="display:none">
+    <div class="card" id="emailSection" style="display:none">
       <div class="section-head">
         <div class="card-label" style="margin:0">보완 안내 메일 초안</div>
         <button class="copy-btn" onclick="copyEmail()">복사</button>
@@ -292,153 +286,107 @@
       <div class="email-box" id="emailContent"></div>
     </div>
 
-    <!-- BP -->
-    <div class="card result-section">
+    <div class="card">
       <div class="card-label">BP 후보 판단</div>
       <div class="bp-box" id="bpContent"></div>
     </div>
 
   </div>
 
-  <footer>GAP 산출물 가이드 기준 v1 · 율리님 전용</footer>
+  <footer>GAP 산출물 가이드 기준 v1</footer>
 </div>
 
 <script>
-const SYSTEM_PROMPT = `당신은 Gen AI Playground(GAP) 운영자입니다. 사용자가 제출한 산출물을 가이드 기준에 따라 검토합니다.
+  // ⚠️ 여기에 Cloudflare Worker URL을 붙여넣으세요
+  const WORKER_URL = 'https://gap-reviewer.yuli87-k.workers.dev/';
 
-## 가이드 체크리스트 (각 항목을 판정하세요)
-1. 제목 100자 이내 여부
-2. 본문 700자 이상 여부
-3. [목적/배경] 항목 포함 여부 (문제 상황, 과제 정의, 배경 맥락)
-4. [GenAI 활용 내용] 항목 포함 여부 (사용 서비스명, 구체적인 활용 방법, 수행 과정)
-5. [시사점/Lesson's Learned/향후 계획] 항목 포함 여부
-6. 정량적 성과 수치 포함 여부 (시간 절약, %, 건수 등)
-7. 첨부파일 언급 여부
+  window.onload = () => {
+    const saved = localStorage.getItem('gap_api_key');
+    if (saved) {
+      document.getElementById('apiKeyInput').value = saved;
+      document.getElementById('keySaved').style.display = 'inline-flex';
+    }
+  };
 
-## BP 후보 기준
-- 정량 수치 있음 + 재현 가능한 구체성 + GenAI 활용이 명확하면 BP 후보
-- 보완 후 BP 가능한 경우도 명시
-
-## 출력 형식 (반드시 이 JSON 형식으로만 응답)
-{
-  "checklist": [
-    {"item": "제목 100자 이내", "status": "pass|fail|warn", "note": "간단한 설명"},
-    {"item": "본문 700자 이상", "status": "pass|fail|warn", "note": ""},
-    {"item": "목적/배경 포함", "status": "pass|fail|warn", "note": ""},
-    {"item": "GenAI 활용 내용 포함", "status": "pass|fail|warn", "note": ""},
-    {"item": "시사점/Lesson's Learned 포함", "status": "pass|fail|warn", "note": ""},
-    {"item": "정량적 성과 수치", "status": "pass|fail|warn", "note": ""},
-    {"item": "첨부파일 언급", "status": "pass|fail|warn", "note": ""}
-  ],
-  "verdict": "pass|fail",
-  "verdict_reason": "종합 판정 이유 한 줄",
-  "needs_revision": true|false,
-  "email": "보완 필요 시 메일 본문 전체 (불필요 시 빈 문자열). 수신자 이름은 OOO님으로.",
-  "bp_judgment": "BP 후보 여부와 이유. 구체적으로."
-}
-
-JSON 외 다른 텍스트는 절대 출력하지 마세요.`;
-
-window.onload = () => {
-  const saved = localStorage.getItem('gap_api_key');
-  if (saved) {
-    document.getElementById('apiKeyInput').value = saved;
+  function saveKey() {
+    const key = document.getElementById('apiKeyInput').value.trim();
+    if (!key) return;
+    localStorage.setItem('gap_api_key', key);
     document.getElementById('keySaved').style.display = 'inline-flex';
   }
-};
 
-function saveKey() {
-  const key = document.getElementById('apiKeyInput').value.trim();
-  if (!key) return;
-  localStorage.setItem('gap_api_key', key);
-  document.getElementById('keySaved').style.display = 'inline-flex';
-}
+  async function analyze() {
+    const key = localStorage.getItem('gap_api_key') || document.getElementById('apiKeyInput').value.trim();
+    const text = document.getElementById('outputText').value.trim();
 
-async function analyze() {
-  const key = localStorage.getItem('gap_api_key') || document.getElementById('apiKeyInput').value.trim();
-  const text = document.getElementById('outputText').value.trim();
+    if (!key) { alert('API 키를 먼저 입력해주세요.'); return; }
+    if (!text) { alert('산출물 본문을 붙여넣어주세요.'); return; }
+    if (WORKER_URL.includes('여기에')) { alert('worker.js를 배포하고 WORKER_URL을 수정해주세요.'); return; }
 
-  if (!key) { alert('API 키를 먼저 입력해주세요.'); return; }
-  if (!text) { alert('산출물 본문을 붙여넣어주세요.'); return; }
+    document.getElementById('analyzeBtn').disabled = true;
+    document.getElementById('loading').classList.add('show');
+    document.getElementById('results').classList.remove('show');
 
-  document.getElementById('analyzeBtn').disabled = true;
-  document.getElementById('loading').classList.add('show');
-  document.getElementById('results').classList.remove('show');
+    try {
+      const res = await fetch(WORKER_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          apiKey: key,
+          prompt: `다음 산출물을 검토해주세요:\n\n${text}`
+        })
+      });
 
-  try {
-    const res = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + key
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        max_tokens: 1500,
-        messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
-          { role: 'user', content: `다음 산출물을 검토해주세요:\n\n${text}` }
-        ]
-      })
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error?.message || '오류 발생');
+
+      const raw = data.choices[0].message.content.replace(/```json|```/g, '').trim();
+      const result = JSON.parse(raw);
+      renderResults(result);
+
+    } catch (e) {
+      alert('오류: ' + e.message);
+    } finally {
+      document.getElementById('analyzeBtn').disabled = false;
+      document.getElementById('loading').classList.remove('show');
+    }
+  }
+
+  function renderResults(r) {
+    const table = document.getElementById('checklistTable');
+    table.innerHTML = r.checklist.map(c => {
+      const cls = c.status === 'pass' ? 'badge-pass' : c.status === 'fail' ? 'badge-fail' : 'badge-warn';
+      const label = c.status === 'pass' ? '통과' : c.status === 'fail' ? '미통과' : '미흡';
+      const note = c.note ? `<span style="font-size:11px;color:var(--text-hint);margin-left:6px;">${c.note}</span>` : '';
+      return `<tr><td>${c.item}${note}</td><td style="text-align:right"><span class="badge ${cls}">${label}</span></td></tr>`;
+    }).join('');
+
+    const vBox = document.getElementById('verdictBox');
+    vBox.innerHTML = r.verdict === 'pass'
+      ? `<div class="verdict verdict-pass">✓ 통과 — ${r.verdict_reason}</div>`
+      : `<div class="verdict verdict-fail">✗ 보완 필요 — ${r.verdict_reason}</div>`;
+
+    const emailSec = document.getElementById('emailSection');
+    if (r.needs_revision && r.email) {
+      emailSec.style.display = 'block';
+      document.getElementById('emailContent').textContent = r.email;
+    } else {
+      emailSec.style.display = 'none';
+    }
+
+    document.getElementById('bpContent').textContent = r.bp_judgment;
+    document.getElementById('results').classList.add('show');
+    document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function copyEmail() {
+    const text = document.getElementById('emailContent').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.querySelector('.copy-btn');
+      btn.textContent = '복사됨 ✓';
+      setTimeout(() => btn.textContent = '복사', 1500);
     });
-
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error?.message || '오류 발생');
-
-    const raw = data.choices[0].message.content.replace(/```json|```/g, '').trim();
-    const result = JSON.parse(raw);
-    renderResults(result);
-
-  } catch (e) {
-    alert('오류: ' + e.message);
-  } finally {
-    document.getElementById('analyzeBtn').disabled = false;
-    document.getElementById('loading').classList.remove('show');
   }
-}
-
-function renderResults(r) {
-  // checklist
-  const table = document.getElementById('checklistTable');
-  table.innerHTML = r.checklist.map(c => {
-    const badgeClass = c.status === 'pass' ? 'badge-pass' : c.status === 'fail' ? 'badge-fail' : 'badge-warn';
-    const badgeText = c.status === 'pass' ? '통과' : c.status === 'fail' ? '미통과' : '미흡';
-    const note = c.note ? `<span style="font-size:11px;color:var(--text-hint);margin-left:6px;">${c.note}</span>` : '';
-    return `<tr><td>${c.item}${note}</td><td style="text-align:right"><span class="badge ${badgeClass}">${badgeText}</span></td></tr>`;
-  }).join('');
-
-  // verdict
-  const vBox = document.getElementById('verdictBox');
-  if (r.verdict === 'pass') {
-    vBox.innerHTML = `<div class="verdict verdict-pass">✓ 통과 — ${r.verdict_reason}</div>`;
-  } else {
-    vBox.innerHTML = `<div class="verdict verdict-fail">✗ 보완 필요 — ${r.verdict_reason}</div>`;
-  }
-
-  // email
-  const emailSec = document.getElementById('emailSection');
-  if (r.needs_revision && r.email) {
-    emailSec.style.display = 'block';
-    document.getElementById('emailContent').textContent = r.email;
-  } else {
-    emailSec.style.display = 'none';
-  }
-
-  // bp
-  document.getElementById('bpContent').textContent = r.bp_judgment;
-
-  document.getElementById('results').classList.add('show');
-  document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-function copyEmail() {
-  const text = document.getElementById('emailContent').textContent;
-  navigator.clipboard.writeText(text).then(() => {
-    const btn = document.querySelector('.copy-btn');
-    btn.textContent = '복사됨 ✓';
-    setTimeout(() => btn.textContent = '복사', 1500);
-  });
-}
 </script>
 </body>
 </html>
