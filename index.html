@@ -61,13 +61,7 @@
     margin-bottom: 10px;
   }
 
-  .input-row {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-  }
-
-  input[type="password"], input[type="text"], textarea {
+  textarea {
     font-family: inherit;
     font-size: 13px;
     background: var(--surface2);
@@ -77,77 +71,97 @@
     padding: 8px 12px;
     outline: none;
     transition: border-color 0.15s;
-  }
-  input[type="password"]:focus, input[type="text"]:focus, textarea:focus {
-    border-color: var(--accent-mid);
-  }
-
-  #apiKeyInput { flex: 1; }
-
-  textarea {
     width: 100%;
     min-height: 200px;
     resize: vertical;
     line-height: 1.6;
   }
-
-  .btn {
-    font-family: inherit;
-    font-size: 13px;
-    font-weight: 500;
-    padding: 8px 16px;
-    border-radius: var(--radius-sm);
-    border: none;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .btn-save {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    color: var(--text-sub);
-  }
-  .btn-save:hover { background: var(--border); }
+  textarea:focus { border-color: var(--accent-mid); }
 
   .btn-primary {
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
     background: var(--accent);
     color: #fff;
     padding: 10px 24px;
-    font-size: 14px;
+    border-radius: var(--radius-sm);
+    border: none;
+    cursor: pointer;
     width: 100%;
-    margin-top: 4px;
+    margin-top: 8px;
+    transition: background 0.15s;
   }
   .btn-primary:hover { background: #234A25; }
   .btn-primary:disabled { background: var(--text-hint); cursor: not-allowed; }
 
-  .saved-indicator {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 11px;
-    color: var(--accent-mid);
-    font-weight: 500;
-  }
-  .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-mid); }
-
   #results { display: none; }
   #results.show { display: block; }
 
-  .checklist-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .checklist-table tr { border-bottom: 1px solid var(--border); }
-  .checklist-table tr:last-child { border-bottom: none; }
-  .checklist-table td { padding: 8px 4px; vertical-align: middle; }
-  .checklist-table td:first-child { color: var(--text-sub); width: 60%; }
-
-  .badge {
-    display: inline-block;
-    font-size: 10px;
-    font-weight: 600;
-    padding: 2px 10px;
-    border-radius: 999px;
+  .loading {
+    display: none;
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-sub);
+    font-size: 13px;
   }
-  .badge-pass { background: #C0DD97; color: #27500A; }
-  .badge-fail { background: #F7C1C1; color: #791F1F; }
-  .badge-warn { background: #FAC775; color: #633806; }
+  .loading.show { display: block; }
+
+  .spinner {
+    display: inline-block;
+    width: 20px; height: 20px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin-bottom: 8px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Score */
+  .score-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .total-score {
+    font-size: 36px;
+    font-weight: 600;
+    line-height: 1;
+  }
+  .total-score span { font-size: 16px; font-weight: 400; color: var(--text-sub); }
+  .score-pass { color: var(--accent); }
+  .score-fail { color: var(--red); }
+
+  .score-bar-wrap { margin-bottom: 12px; }
+  .score-bar-bg {
+    height: 6px;
+    background: var(--surface2);
+    border-radius: 999px;
+    margin: 4px 0;
+    overflow: hidden;
+  }
+  .score-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.6s ease;
+  }
+  .bar-required { background: var(--accent-mid); }
+  .bar-bonus { background: #378ADD; }
+
+  .score-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    margin-bottom: 4px;
+  }
+  .score-row-label { color: var(--text-sub); }
+  .score-row-val { font-weight: 500; }
+  .score-note { font-size: 11px; color: var(--text-hint); margin-top: 2px; margin-bottom: 10px; }
+
+  .divider { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
 
   .verdict {
     display: flex;
@@ -184,25 +198,12 @@
     white-space: pre-wrap;
   }
 
-  .loading {
-    display: none;
-    text-align: center;
-    padding: 2rem;
-    color: var(--text-sub);
-    font-size: 13px;
+  .section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
   }
-  .loading.show { display: block; }
-
-  .spinner {
-    display: inline-block;
-    width: 20px; height: 20px;
-    border: 2px solid var(--border);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-    margin-bottom: 8px;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
 
   .copy-btn {
     font-family: inherit;
@@ -213,19 +214,8 @@
     border-radius: var(--radius-sm);
     color: var(--text-sub);
     cursor: pointer;
-    float: right;
-    margin-top: -2px;
   }
   .copy-btn:hover { background: var(--surface2); }
-
-  .section-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 10px;
-  }
-
-  .hint { font-size: 11px; color: var(--text-hint); margin-top: 8px; }
 
   footer {
     text-align: center;
@@ -241,43 +231,82 @@
   <header>
     <div class="logo">Gen AI Playground</div>
     <h1>산출물 검토 도구</h1>
-    <p class="subtitle">가이드 기준에 따라 통과 여부, 보완 메일, BP 후보를 자동 판정합니다</p>
+    <p class="subtitle">가이드 기준에 따라 점수를 산정하고 보완 메일과 BP 후보를 판정합니다</p>
   </header>
 
-  <!-- API Key -->
-  <div class="card">
-    <div class="card-label">OpenAI API 키</div>
-    <div class="input-row">
-      <input type="password" id="apiKeyInput" placeholder="sk-..." />
-      <button class="btn btn-save" onclick="saveKey()">저장</button>
-      <span id="keySaved" class="saved-indicator" style="display:none"><span class="dot"></span>저장됨</span>
-    </div>
-    <p class="hint">키는 이 브라우저에만 저장되며 외부로 전송되지 않습니다.</p>
-  </div>
-
-  <!-- Input -->
   <div class="card">
     <div class="card-label">산출물 본문 붙여넣기</div>
     <textarea id="outputText" placeholder="GAP 시스템에서 작성된 산출물 본문을 여기에 붙여넣으세요.&#10;&#10;여러 개를 한 번에 검토하려면 각 산출물 앞에 [1], [2], [3] 번호를 붙여주세요."></textarea>
-    <button class="btn btn-primary" onclick="analyze()" id="analyzeBtn">검토 시작</button>
+    <button class="btn-primary" onclick="analyze()" id="analyzeBtn">검토 시작</button>
   </div>
 
-  <!-- Loading -->
   <div class="loading" id="loading">
     <div class="spinner"></div>
     <div>산출물 분석 중...</div>
   </div>
 
-  <!-- Results -->
   <div id="results">
 
+    <!-- Score card -->
     <div class="card">
-      <div class="card-label">체크리스트 판정</div>
-      <table class="checklist-table" id="checklistTable"></table>
+      <div class="card-label">점수</div>
+      <div class="score-header">
+        <div class="total-score" id="totalScore">0<span>/100+</span></div>
+        <div id="scoreBadge"></div>
+      </div>
+
+      <div class="score-bar-wrap">
+        <div class="score-row">
+          <span class="score-row-label">목적/배경</span>
+          <span class="score-row-val" id="purposeScore">—</span>
+        </div>
+        <div class="score-bar-bg"><div class="score-bar-fill bar-required" id="purposeBar" style="width:0%"></div></div>
+        <div class="score-note" id="purposeNote"></div>
+      </div>
+
+      <div class="score-bar-wrap">
+        <div class="score-row">
+          <span class="score-row-label">GenAI 활용 내용</span>
+          <span class="score-row-val" id="genaiScore">—</span>
+        </div>
+        <div class="score-bar-bg"><div class="score-bar-fill bar-required" id="genaiBar" style="width:0%"></div></div>
+        <div class="score-note" id="genaiNote"></div>
+      </div>
+
+      <div class="score-bar-wrap">
+        <div class="score-row">
+          <span class="score-row-label">시사점 / Lesson's Learned</span>
+          <span class="score-row-val" id="lessonsScore">—</span>
+        </div>
+        <div class="score-bar-bg"><div class="score-bar-fill bar-required" id="lessonsBar" style="width:0%"></div></div>
+        <div class="score-note" id="lessonsNote"></div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="score-bar-wrap">
+        <div class="score-row">
+          <span class="score-row-label">정량적 성과 수치 <span style="color:var(--text-hint);font-size:11px">보너스</span></span>
+          <span class="score-row-val" id="quantScore">—</span>
+        </div>
+        <div class="score-bar-bg"><div class="score-bar-fill bar-bonus" id="quantBar" style="width:0%"></div></div>
+        <div class="score-note" id="quantNote"></div>
+      </div>
+
+      <div class="score-bar-wrap">
+        <div class="score-row">
+          <span class="score-row-label">첨부파일 <span style="color:var(--text-hint);font-size:11px">보너스</span></span>
+          <span class="score-row-val" id="attachScore">—</span>
+        </div>
+        <div class="score-bar-bg"><div class="score-bar-fill bar-bonus" id="attachBar" style="width:0%"></div></div>
+        <div class="score-note" id="attachNote"></div>
+      </div>
     </div>
 
+    <!-- Verdict -->
     <div id="verdictBox"></div>
 
+    <!-- Email -->
     <div class="card" id="emailSection" style="display:none">
       <div class="section-head">
         <div class="card-label" style="margin:0">보완 안내 메일 초안</div>
@@ -286,6 +315,7 @@
       <div class="email-box" id="emailContent"></div>
     </div>
 
+    <!-- BP -->
     <div class="card">
       <div class="card-label">BP 후보 판단</div>
       <div class="bp-box" id="bpContent"></div>
@@ -293,35 +323,16 @@
 
   </div>
 
-  <footer>GAP 산출물 가이드 기준 v1</footer>
+  <footer>GAP 산출물 가이드 기준 v2</footer>
 </div>
 
 <script>
-  // ⚠️ 여기에 Cloudflare Worker URL을 붙여넣으세요
   const WORKER_URL = 'https://gap-reviewer.yuli87-k.workers.dev/';
 
-  window.onload = () => {
-    const saved = localStorage.getItem('gap_api_key');
-    if (saved) {
-      document.getElementById('apiKeyInput').value = saved;
-      document.getElementById('keySaved').style.display = 'inline-flex';
-    }
-  };
-
-  function saveKey() {
-    const key = document.getElementById('apiKeyInput').value.trim();
-    if (!key) return;
-    localStorage.setItem('gap_api_key', key);
-    document.getElementById('keySaved').style.display = 'inline-flex';
-  }
-
   async function analyze() {
-    const key = localStorage.getItem('gap_api_key') || document.getElementById('apiKeyInput').value.trim();
     const text = document.getElementById('outputText').value.trim();
-
-    if (!key) { alert('API 키를 먼저 입력해주세요.'); return; }
     if (!text) { alert('산출물 본문을 붙여넣어주세요.'); return; }
-    if (WORKER_URL.includes('여기에')) { alert('worker.js를 배포하고 WORKER_URL을 수정해주세요.'); return; }
+    if (WORKER_URL.includes('여기에')) { alert('WORKER_URL을 수정해주세요.'); return; }
 
     document.getElementById('analyzeBtn').disabled = true;
     document.getElementById('loading').classList.add('show');
@@ -331,10 +342,7 @@
       const res = await fetch(WORKER_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          apiKey: key,
-          prompt: `다음 산출물을 검토해주세요:\n\n${text}`
-        })
+        body: JSON.stringify({ prompt: `다음 산출물을 검토해주세요:\n\n${text}` })
       });
 
       const data = await res.json();
@@ -353,19 +361,28 @@
   }
 
   function renderResults(r) {
-    const table = document.getElementById('checklistTable');
-    table.innerHTML = r.checklist.map(c => {
-      const cls = c.status === 'pass' ? 'badge-pass' : c.status === 'fail' ? 'badge-fail' : 'badge-warn';
-      const label = c.status === 'pass' ? '통과' : c.status === 'fail' ? '미통과' : '미흡';
-      const note = c.note ? `<span style="font-size:11px;color:var(--text-hint);margin-left:6px;">${c.note}</span>` : '';
-      return `<tr><td>${c.item}${note}</td><td style="text-align:right"><span class="badge ${cls}">${label}</span></td></tr>`;
-    }).join('');
+    const s = r.scores;
+    const total = r.total;
 
+    // Total score
+    const scoreEl = document.getElementById('totalScore');
+    scoreEl.innerHTML = `${total}<span>/100+</span>`;
+    scoreEl.className = 'total-score ' + (r.verdict === 'pass' ? 'score-pass' : 'score-fail');
+
+    // Score rows
+    setScore('purpose', s.purpose.score, s.purpose.max, s.purpose.reason, false);
+    setScore('genai', s.genai.score, s.genai.max, s.genai.reason, false);
+    setScore('lessons', s.lessons.score, s.lessons.max, s.lessons.reason, false);
+    setScore('quant', s.quantitative.bonus, s.quantitative.max, s.quantitative.reason, true);
+    setScore('attach', s.attachment.bonus, s.attachment.max, s.attachment.reason, true);
+
+    // Verdict
     const vBox = document.getElementById('verdictBox');
     vBox.innerHTML = r.verdict === 'pass'
       ? `<div class="verdict verdict-pass">✓ 통과 — ${r.verdict_reason}</div>`
       : `<div class="verdict verdict-fail">✗ 보완 필요 — ${r.verdict_reason}</div>`;
 
+    // Email
     const emailSec = document.getElementById('emailSection');
     if (r.needs_revision && r.email) {
       emailSec.style.display = 'block';
@@ -374,9 +391,18 @@
       emailSec.style.display = 'none';
     }
 
+    // BP
     document.getElementById('bpContent').textContent = r.bp_judgment;
+
     document.getElementById('results').classList.add('show');
     document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function setScore(key, score, max, note, isBonus) {
+    const prefix = isBonus ? key === 'quant' ? 'quant' : 'attach' : key;
+    document.getElementById(prefix + 'Score').textContent = `${score} / ${max}점`;
+    document.getElementById(prefix + 'Bar').style.width = `${(score / max) * 100}%`;
+    document.getElementById(prefix + 'Note').textContent = note;
   }
 
   function copyEmail() {
