@@ -371,7 +371,7 @@
 
     // Score rows
     setScore('purpose', s.purpose.score, s.purpose.max, s.purpose.reason, false);
-    setScore('genai', s.genai.score, s.genai.max, s.genai.reason, false);
+    setScore('genai', s.genai.score, s.genai.max, s.genai.reason, false, s.genai.penalty);
     setScore('lessons', s.lessons.score, s.lessons.max, s.lessons.reason, false);
     setScore('quant', s.quantitative.bonus, s.quantitative.max, s.quantitative.reason, true);
     setScore('attach', s.attachment.bonus, s.attachment.max, s.attachment.reason, true);
@@ -398,10 +398,13 @@
     document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  function setScore(key, score, max, note, isBonus) {
+  function setScore(key, score, max, note, isBonus, isPenalty) {
     const prefix = isBonus ? key === 'quant' ? 'quant' : 'attach' : key;
-    document.getElementById(prefix + 'Score').textContent = `${score} / ${max}점`;
-    document.getElementById(prefix + 'Bar').style.width = `${(score / max) * 100}%`;
+    const scoreLabel = isPenalty ? `${score}점 ⚠️ 패널티` : `${score} / ${max}점`;
+    document.getElementById(prefix + 'Score').textContent = scoreLabel;
+    document.getElementById(prefix + 'Score').style.color = isPenalty ? 'var(--red)' : '';
+    document.getElementById(prefix + 'Bar').style.width = isPenalty ? '100%' : `${(score / max) * 100}%`;
+    document.getElementById(prefix + 'Bar').style.background = isPenalty ? 'var(--red)' : '';
     document.getElementById(prefix + 'Note').textContent = note;
   }
 
