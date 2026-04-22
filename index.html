@@ -235,7 +235,16 @@
   </header>
 
   <div class="card">
-    <div class="card-label">산출물 본문 붙여넣기</div>
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+      <div class="card-label" style="margin:0">산출물 본문 붙여넣기</div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:11px; color:var(--text-hint);">일관성</span>
+        <input type="range" min="0" max="1" step="0.1" value="0.3" id="tempSlider"
+          style="width:80px;" oninput="document.getElementById('tempVal').textContent=this.value">
+        <span style="font-size:11px; color:var(--text-hint);">창의성</span>
+        <span style="font-size:12px; font-weight:500; color:var(--text-sub); min-width:24px;" id="tempVal">0.3</span>
+      </div>
+    </div>
     <textarea id="outputText" placeholder="GAP 시스템에서 작성된 산출물 본문을 여기에 붙여넣으세요.&#10;&#10;여러 개를 한 번에 검토하려면 각 산출물 앞에 [1], [2], [3] 번호를 붙여주세요."></textarea>
     <button class="btn-primary" onclick="analyze()" id="analyzeBtn">검토 시작</button>
   </div>
@@ -342,7 +351,10 @@
       const res = await fetch(WORKER_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: `다음 산출물을 검토해주세요:\n\n${text}` })
+        body: JSON.stringify({
+          prompt: `다음 산출물을 검토해주세요:\n\n${text}`,
+          temperature: parseFloat(document.getElementById('tempSlider').value)
+        })
       });
 
       const data = await res.json();
